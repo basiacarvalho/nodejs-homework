@@ -49,7 +49,26 @@ router.delete("/:contactId", async (req, res, next) => {
 });
 
 router.put("/:contactId", async (req, res, next) => {
-  res.json({ message: "template message" });
+  const { contactId } = req.params;
+  const schema = Joi.object({
+    name: Joi.string().required(),
+    email: Joi.string().required(),
+    phone: Joi.string().required(),
+  });
+
+  const validationResult = schema.validate(req.body);
+  if (validationResult.error) {
+    res.status(400).json({
+      message: "missing fields",
+    });
+    return;
+  }
+  const updatedContact = await contacts.updateContact(contactId, req.body);
+  if (updatedContact) {
+    res.status(200).json(updatedContact);
+  } else {
+    res.status(404).json({ message: "Not found" });
+  }
 });
 
 module.exports = router;
