@@ -3,7 +3,7 @@ const contacts = require("../../models/contacts");
 
 const router = express.Router();
 
-router.get("/", async (req, res, next) => {
+router.get("/", async (_, res, next) => {
   const contactList = await contacts.listContacts();
   res.json(contactList);
 });
@@ -22,7 +22,12 @@ router.post("/", async (req, res, next) => {
 });
 
 router.delete("/:contactId", async (req, res, next) => {
-  res.json({ message: "template message" });
+  const isDeleted = await contacts.removeContact(req.params.contactId);
+  if (isDeleted) {
+    res.status(200).json({ message: "contact deleted" });
+  } else {
+    res.status(404).json({ message: "Not found" });
+  }
 });
 
 router.put("/:contactId", async (req, res, next) => {
