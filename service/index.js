@@ -1,37 +1,47 @@
 const Contact = require("./schemas/contact");
 
-const listContacts = () => {
+const listContacts = async () => {
   try {
-    return Contact.find();
+    return await Contact.find();
   } catch (err) {
     console.error(err.message);
   }
 };
 
-const getContactById = (contactId) => {
-  return Contact.findById(contactId);
+const getContactById = async (contactId) => {
+  return await Contact.findById(contactId);
 };
 
-const removeContact = (contactId) => {
+const removeContact = async (contactId) => {
   try {
-    return Contact.findByIdAndRemove(contactId);
+    return await Contact.findByIdAndRemove(contactId);
   } catch (err) {
     console.error(err.message);
     return false;
   }
 };
 
-const addContact = (name, email, phone) => {
+const addContact = async (name, email, phone) => {
   try {
-    return Contact.create({ name, email, phone });
+    return await Contact.create({ name, email, phone });
   } catch (err) {
     console.error(err.message);
   }
 };
 
-const updateContact = (contactId, contact) => {
+const updateContact = async (contactId, contact) => {
   try {
-    return Contact.findByIdAndUpdate({ _id: contactId }, contact, {
+    return await Contact.findByIdAndUpdate(contactId, contact, {
+      new: true,
+    });
+  } catch (err) {
+    console.error(err.message);
+  }
+};
+
+const updateStatusContact = async (contactId, contact) => {
+  try {
+    return await Contact.findByIdAndUpdate(contactId, contact, {
       new: true,
     });
   } catch (err) {
@@ -45,4 +55,5 @@ module.exports = {
   removeContact,
   addContact,
   updateContact,
+  updateStatusContact,
 };

@@ -93,10 +93,40 @@ const updateContact = async (req, res, next) => {
   }
 };
 
+const updateStatusContact = async (req, res, next) => {
+  try {
+    const { contactId } = req.params;
+    const schema = Joi.object({
+      favorite: Joi.boolean(),
+    });
+
+    const validationResult = schema.validate(req.body);
+    if (validationResult.error) {
+      res.status(400).json({
+        message: "missing favorite field",
+      });
+      return;
+    }
+    const updatedStatusContact = await service.updateStatusContact(
+      contactId,
+      req.body
+    );
+    if (updatedStatusContact) {
+      res.status(200).json(updatedStatusContact);
+    } else {
+      res.status(404).json({ message: "Not found" });
+    }
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+};
+
 module.exports = {
   getContacts,
   getContactById,
   createNewContact,
   deleteContact,
   updateContact,
+  updateStatusContact,
 };
