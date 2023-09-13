@@ -1,9 +1,9 @@
-const contacts = require("../models/contacts");
+const service = require("../service");
 const Joi = require("joi");
 
 const getContacts = async (_, res, next) => {
   try {
-    const contactList = await contacts.listContacts();
+    const contactList = await service.listContacts();
     res.json(contactList);
   } catch (e) {
     console.error(e);
@@ -13,7 +13,7 @@ const getContacts = async (_, res, next) => {
 
 const getContactById = async (req, res, next) => {
   try {
-    const contact = await contacts.getContactById(req.params.contactId);
+    const contact = await service.getContactById(req.params.contactId);
     if (contact) {
       res.json(contact);
     } else {
@@ -41,7 +41,7 @@ const createNewContact = async (req, res, next) => {
       });
       return;
     }
-    const newContact = await contacts.addContact(name, email, phone);
+    const newContact = await service.addContact(name, email, phone);
     if (newContact) {
       res.status(201).json({ newContact });
     }
@@ -53,7 +53,7 @@ const createNewContact = async (req, res, next) => {
 
 const deleteContact = async (req, res, next) => {
   try {
-    const isDeleted = await contacts.removeContact(req.params.contactId);
+    const isDeleted = await service.removeContact(req.params.contactId);
     if (isDeleted) {
       res.status(200).json({ message: "contact deleted" });
     } else {
@@ -81,7 +81,7 @@ const updateContact = async (req, res, next) => {
       });
       return;
     }
-    const updatedContact = await contacts.updateContact(contactId, req.body);
+    const updatedContact = await service.updateContact(contactId, req.body);
     if (updatedContact) {
       res.status(200).json(updatedContact);
     } else {
