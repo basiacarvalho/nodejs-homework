@@ -1,8 +1,8 @@
 const app = require("./app");
 const mongoose = require("mongoose");
+require("dotenv").config();
 
-const uriDb =
-  "mongodb+srv://basiacarvalho:CPEODGZl2A3FR1cm@cluster0.zv2z0gw.mongodb.net/db-contacts?retryWrites=true&w=majority";
+const uriDb = process.env.DATABASE_URI;
 
 const connection = mongoose.connect(uriDb, {
   useNewUrlParser: true,
