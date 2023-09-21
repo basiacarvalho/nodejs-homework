@@ -41,6 +41,7 @@ const createNewContact = async (req, res, next) => {
       });
       return;
     }
+    const { name, email, phone } = req.body;
     const newContact = await contactsService.addContact(name, email, phone);
     if (newContact) {
       res.status(201).json({ newContact });
