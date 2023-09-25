@@ -44,7 +44,22 @@ const login = async (email, password) => {
   }
 };
 
+const logoutUser = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return false;
+    }
+    user.token = null;
+    await user.save();
+    return true;
+  } catch (err) {
+    console.error(err.message);
+  }
+};
+
 module.exports = {
   addUser,
   login,
+  logoutUser,
 };

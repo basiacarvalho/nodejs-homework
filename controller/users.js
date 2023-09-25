@@ -1,5 +1,6 @@
 const { usersService } = require("../service");
 const Joi = require("joi");
+const jwt = require("jsonwebtoken");
 
 const createUser = async (req, res, next) => {
   try {
@@ -55,7 +56,23 @@ const login = async (req, res, next) => {
   }
 };
 
+const logout = async (req, res, next) => {
+  try {
+    const decode = jwt.decode(req.headers.authorization.split(" ")[1]);
+    const isLoggedout = await usersService.logoutUser(decode.id);
+    if (isLoggedout) {
+      res.status(204).send();
+    } else {
+      res.status(401).json({ message: "Not authorized" });
+    }
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+};
+
 module.exports = {
   createUser,
   login,
+  logout,
 };
