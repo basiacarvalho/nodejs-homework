@@ -1,6 +1,7 @@
 const app = require("./app");
 const mongoose = require("mongoose");
 require("dotenv").config();
+require("./config/config-passport");
 
 const uriDb = process.env.DATABASE_URI;
 
