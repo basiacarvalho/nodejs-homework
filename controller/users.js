@@ -56,10 +56,14 @@ const login = async (req, res, next) => {
   }
 };
 
+const getUserId = (req) => {
+  const tokenData = jwt.decode(req.headers.authorization.split(" ")[1]);
+  return tokenData.id;
+};
+
 const logout = async (req, res, next) => {
   try {
-    const decode = jwt.decode(req.headers.authorization.split(" ")[1]);
-    const isLoggedout = await usersService.logoutUser(decode.id);
+    const isLoggedout = await usersService.logoutUser(getUserId(req));
     if (isLoggedout) {
       res.status(204).send();
     } else {
@@ -71,8 +75,23 @@ const logout = async (req, res, next) => {
   }
 };
 
+const getUserInfo = async (req, res, next) => {
+  try {
+    const userInfo = await usersService.findUserInfo(getUserId(req));
+    if (!userInfo) {
+      res.status(401).json({ message: "Not authorized" });
+    } else {
+      res.status(200).json(userInfo);
+    }
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+};
+
 module.exports = {
   createUser,
   login,
   logout,
+  getUserInfo,
 };

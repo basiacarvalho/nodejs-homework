@@ -58,8 +58,21 @@ const logoutUser = async (userId) => {
   }
 };
 
+const findUserInfo = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    return {
+      email: user.email,
+      subscription: user.subscription,
+    };
+  } catch (err) {
+    console.error(err.message);
+  }
+};
+
 module.exports = {
   addUser,
   login,
   logoutUser,
+  findUserInfo,
 };
