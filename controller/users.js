@@ -89,9 +89,36 @@ const getUserInfo = async (req, res, next) => {
   }
 };
 
+const updateUserSubscription = async (req, res, next) => {
+  const { subscription } = req.body;
+  const schema = Joi.object({
+    subscription: Joi.string().valid("starter", "pro", "business").required(),
+  });
+  const validationResult = schema.validate(req.body);
+  if (validationResult.error) {
+    res.status(400).json(validationResult.error.details[0].message);
+    return;
+  }
+  try {
+    const userSubscription = await usersService.updateUserSubscription(
+      getUserId(req),
+      subscription
+    );
+    if (userSubscription) {
+      res.status(200).json(userSubscription);
+    } else {
+      res.status(404).send();
+    }
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+};
+
 module.exports = {
   createUser,
   login,
   logout,
   getUserInfo,
+  updateUserSubscription,
 };

@@ -1,13 +1,5 @@
 const Contact = require("./schemas/contact");
 
-// const listContacts = async () => {
-//   try {
-//     return await Contact.find();
-//   } catch (err) {
-//     console.error(err.message);
-//   }
-// };
-
 const listContacts = async (page, limit, favorite) => {
   try {
     let filter;
@@ -66,11 +58,15 @@ const updateContact = async (contactId, contact) => {
   }
 };
 
-const updateStatusContact = async (contactId, contact) => {
+const updateStatusContact = async (contactId, favorite) => {
   try {
-    return await Contact.findByIdAndUpdate(contactId, contact, {
-      new: true,
-    });
+    return await Contact.findByIdAndUpdate(
+      contactId,
+      { favorite },
+      {
+        new: true,
+      }
+    );
   } catch (err) {
     console.error(err.message);
   }

@@ -70,9 +70,26 @@ const findUserInfo = async (userId) => {
   }
 };
 
+const updateUserSubscription = async (userId, subscription) => {
+  try {
+    return await User.findByIdAndUpdate(
+      userId,
+      {
+        subscription,
+      },
+      {
+        new: true,
+      }
+    );
+  } catch (err) {
+    console.error(err.message);
+  }
+};
+
 module.exports = {
   addUser,
   login,
   logoutUser,
   findUserInfo,
+  updateUserSubscription,
 };

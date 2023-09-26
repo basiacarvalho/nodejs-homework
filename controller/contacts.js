@@ -114,7 +114,7 @@ const updateStatusContact = async (req, res, next) => {
     }
     const updatedStatusContact = await contactsService.updateStatusContact(
       contactId,
-      req.body
+      req.body.favorite
     );
     if (updatedStatusContact) {
       res.status(200).json(updatedStatusContact);
