@@ -1,10 +1,11 @@
 const { contactsService } = require("../service");
 const Joi = require("joi");
 
-const getContacts = async (_, res, next) => {
+const getContacts = async (req, res, next) => {
   try {
-    const contactList = await contactsService.listContacts();
-    res.json(contactList);
+    const { page = 1, limit = 20, favorite } = req.query;
+    const result = await contactsService.listContacts(page, limit, favorite);
+    res.json(result);
   } catch (e) {
     console.error(e);
     next(e);

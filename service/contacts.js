@@ -1,8 +1,35 @@
 const Contact = require("./schemas/contact");
 
-const listContacts = async () => {
+// const listContacts = async () => {
+//   try {
+//     return await Contact.find();
+//   } catch (err) {
+//     console.error(err.message);
+//   }
+// };
+
+const listContacts = async (page, limit, favorite) => {
   try {
-    return await Contact.find();
+    let filter;
+    if (favorite === undefined) {
+      filter = {};
+    } else {
+      filter = { favorite };
+    }
+
+    const result = await Contact.find(filter)
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .exec();
+
+    const count = await Contact.count(filter);
+
+    return {
+      result,
+      count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+    };
   } catch (err) {
     console.error(err.message);
   }
