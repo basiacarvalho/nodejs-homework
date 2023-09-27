@@ -4,7 +4,12 @@ const Joi = require("joi");
 const getContacts = async (req, res, next) => {
   try {
     const { page = 1, limit = 20, favorite } = req.query;
-    const result = await contactsService.listContacts(page, limit, favorite);
+    const result = await contactsService.listContacts(
+      req.user,
+      page,
+      limit,
+      favorite
+    );
     res.json(result);
   } catch (e) {
     console.error(e);
@@ -14,7 +19,10 @@ const getContacts = async (req, res, next) => {
 
 const getContactById = async (req, res, next) => {
   try {
-    const contact = await contactsService.getContactById(req.params.contactId);
+    const contact = await contactsService.getContactById(
+      req.user,
+      req.params.contactId
+    );
     if (contact) {
       res.json(contact);
     } else {
@@ -43,7 +51,12 @@ const createNewContact = async (req, res, next) => {
       return;
     }
     const { name, email, phone } = req.body;
-    const newContact = await contactsService.addContact(name, email, phone);
+    const newContact = await contactsService.addContact(
+      req.user,
+      name,
+      email,
+      phone
+    );
     if (newContact) {
       res.status(201).json({ newContact });
     }
@@ -55,7 +68,10 @@ const createNewContact = async (req, res, next) => {
 
 const deleteContact = async (req, res, next) => {
   try {
-    const isDeleted = await contactsService.removeContact(req.params.contactId);
+    const isDeleted = await contactsService.removeContact(
+      req.user,
+      req.params.contactId
+    );
     if (isDeleted) {
       res.status(200).json({ message: "contact deleted" });
     } else {
@@ -84,6 +100,7 @@ const updateContact = async (req, res, next) => {
       return;
     }
     const updatedContact = await contactsService.updateContact(
+      req.user,
       contactId,
       req.body
     );
@@ -113,6 +130,7 @@ const updateStatusContact = async (req, res, next) => {
       return;
     }
     const updatedStatusContact = await contactsService.updateStatusContact(
+      req.user,
       contactId,
       req.body.favorite
     );

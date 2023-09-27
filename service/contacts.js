@@ -1,12 +1,10 @@
 const Contact = require("./schemas/contact");
 
-const listContacts = async (page, limit, favorite) => {
+const listContacts = async (owner, page, limit, favorite) => {
   try {
-    let filter;
-    if (favorite === undefined) {
-      filter = {};
-    } else {
-      filter = { favorite };
+    const filter = { owner };
+    if (favorite !== undefined) {
+      filter.favorite = favorite;
     }
 
     const result = await Contact.find(filter)
@@ -24,44 +22,51 @@ const listContacts = async (page, limit, favorite) => {
     };
   } catch (err) {
     console.error(err.message);
+    throw err;
   }
 };
 
-const getContactById = async (contactId) => {
-  return await Contact.findById(contactId);
+const getContactById = async (owner, contactId) => {
+  return await Contact.findOne({ _id: contactId, owner });
 };
 
-const removeContact = async (contactId) => {
+const removeContact = async (owner, contactId) => {
   try {
-    return await Contact.findByIdAndRemove(contactId);
+    return await Contact.findOneAndDelete({ _id: contactId, owner });
   } catch (err) {
     console.error(err.message);
     return false;
   }
 };
 
-const addContact = async (name, email, phone) => {
+const addContact = async (owner, name, email, phone) => {
   try {
-    return await Contact.create({ name, email, phone });
+    return await Contact.create({ name, email, phone, owner: owner });
   } catch (err) {
     console.error(err.message);
+    throw err;
   }
 };
 
-const updateContact = async (contactId, contact) => {
+const updateContact = async (owner, contactId, contact) => {
   try {
-    return await Contact.findByIdAndUpdate(contactId, contact, {
-      new: true,
-    });
+    return await Contact.findOneAndUpdate(
+      { _id: contactId, owner: owner },
+      contact,
+      {
+        new: true,
+      }
+    );
   } catch (err) {
     console.error(err.message);
+    throw err;
   }
 };
 
-const updateStatusContact = async (contactId, favorite) => {
+const updateStatusContact = async (owner, contactId, favorite) => {
   try {
-    return await Contact.findByIdAndUpdate(
-      contactId,
+    return await Contact.findOneAndUpdate(
+      { _id: contactId, owner },
       { favorite },
       {
         new: true,

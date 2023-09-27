@@ -14,6 +14,7 @@ const addUser = async (email, password) => {
     return newUser;
   } catch (err) {
     console.error(err.message);
+    throw err;
   }
 };
 
@@ -83,6 +84,7 @@ const updateUserSubscription = async (userId, subscription) => {
     );
   } catch (err) {
     console.error(err.message);
+    throw err;
   }
 };
 

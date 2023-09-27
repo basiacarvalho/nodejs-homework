@@ -1,6 +1,5 @@
 const { usersService } = require("../service");
 const Joi = require("joi");
-const jwt = require("jsonwebtoken");
 
 const createUser = async (req, res, next) => {
   try {
@@ -56,18 +55,13 @@ const login = async (req, res, next) => {
   }
 };
 
-const getUserId = (req) => {
-  const tokenData = jwt.decode(req.headers.authorization.split(" ")[1]);
-  return tokenData.id;
-};
-
 const logout = async (req, res, next) => {
   try {
-    const isLoggedout = await usersService.logoutUser(getUserId(req));
+    const isLoggedout = await usersService.logoutUser(req.user);
     if (isLoggedout) {
       res.status(204).send();
     } else {
-      res.status(401).json({ message: "Not authorized" });
+      res.status(401).send();
     }
   } catch (e) {
     console.error(e);
@@ -77,9 +71,9 @@ const logout = async (req, res, next) => {
 
 const getUserInfo = async (req, res, next) => {
   try {
-    const userInfo = await usersService.findUserInfo(getUserId(req));
+    const userInfo = await usersService.findUserInfo(req.user);
     if (!userInfo) {
-      res.status(401).json({ message: "Not authorized" });
+      res.status(401).send();
     } else {
       res.status(200).json(userInfo);
     }
@@ -101,7 +95,7 @@ const updateUserSubscription = async (req, res, next) => {
   }
   try {
     const userSubscription = await usersService.updateUserSubscription(
-      getUserId(req),
+      req.user,
       subscription
     );
     if (userSubscription) {
