@@ -111,9 +111,9 @@ const updateUserSubscription = async (req, res, next) => {
 
 const updateUserAvatar = async (req, res, next) => {
   const { path: temporaryName } = req.file;
-  await usersService.uploadUserAvatar(req.user, temporaryName);
+  const result = await usersService.uploadUserAvatar(req.user, temporaryName);
   try {
-    res.status(200).send();
+    res.status(200).json(result);
   } catch (err) {
     return next(err);
   }

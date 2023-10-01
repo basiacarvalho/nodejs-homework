@@ -18,7 +18,7 @@ const addUser = async (email, password) => {
     const newUser = new User({
       email,
       password,
-      avatarURL: gravatar.url(email),
+      avatarURL: gravatar.url(email, { d: "identicon" }),
     });
     newUser.setPassword(password);
     await newUser.save();
@@ -107,14 +107,22 @@ const uploadUserAvatar = async (user, avatarOriginalName) => {
     .catch((err) => {
       console.error(err);
     });
-  const newName = `${user.email}_${nanoid(5)}`;
-  await User.findByIdAndUpdate(user, {
-    avatarURL: `/avatars/${newName}`,
-  });
+  const extensionIndex = avatarOriginalName.lastIndexOf(".");
+  const extension = avatarOriginalName.slice(extensionIndex);
+  const newName = `${user.email}_${nanoid(5)}${extension}`;
   const fileName = path.join(storeImage, newName);
-  console.log(path.relative);
   try {
     await fs.rename(avatarOriginalName, fileName);
+    const updatedUser = await User.findByIdAndUpdate(
+      user,
+      {
+        avatarURL: `/avatars/${newName}`,
+      },
+      {
+        new: true,
+      }
+    );
+    return { avatarURL: updatedUser.avatarURL };
   } catch (err) {
     await fs.unlink(avatarOriginalName);
     console.error(err.message);
