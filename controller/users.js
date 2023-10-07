@@ -18,7 +18,10 @@ const createUser = async (req, res, next) => {
     const { email, password } = req.body;
     const newUser = await usersService.addUser(email, password);
     if (newUser) {
-      res.status(201).json({ newUser });
+      res.status(201).json({
+        email: newUser.email,
+        subscription: newUser.subscription,
+      });
     } else {
       res.status(409).json({ message: "Email is already in use" });
     }
