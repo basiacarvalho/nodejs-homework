@@ -27,7 +27,12 @@ const listContacts = async (owner, page, limit, favorite) => {
 };
 
 const getContactById = async (owner, contactId) => {
-  return await Contact.findOne({ _id: contactId, owner });
+  try {
+    return await Contact.findOne({ _id: contactId, owner });
+  } catch (err) {
+    console.error(err.message);
+    throw err;
+  }
 };
 
 const removeContact = async (owner, contactId) => {

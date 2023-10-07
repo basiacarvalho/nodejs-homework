@@ -124,7 +124,12 @@ const uploadUserAvatar = async (user, avatarOriginalName) => {
     );
     return { avatarURL: updatedUser.avatarURL };
   } catch (err) {
-    await fs.unlink(avatarOriginalName);
+    try {
+      await fs.unlink(avatarOriginalName);
+    } catch (err) {
+      console.error(err.message);
+      throw err;
+    }
     console.error(err.message);
     throw err;
   }

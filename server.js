@@ -20,8 +20,13 @@ const isAccessible = (path) => {
 };
 
 const createFolderIsNotExist = async (folder) => {
-  if (!(await isAccessible(folder))) {
-    await fs.mkdir(folder);
+  try {
+    if (!(await isAccessible(folder))) {
+      await fs.mkdir(folder);
+    }
+  } catch (err) {
+    console.log(err);
+    throw err;
   }
 };
 
