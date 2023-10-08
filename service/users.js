@@ -1,6 +1,13 @@
 const User = require("./schemas/user");
 const jwt = require("jsonwebtoken");
+const gravatar = require("gravatar");
+const Jimp = require("jimp");
+const fs = require("fs").promises;
+const { nanoid } = require("nanoid");
+const path = require("path");
+
 const secret = process.env.SECRET;
+const storeImage = path.join(process.cwd(), "public/avatars");
 
 const addUser = async (email, password) => {
   try {
@@ -8,7 +15,11 @@ const addUser = async (email, password) => {
     if (user) {
       return null;
     }
-    const newUser = new User({ email, password });
+    const newUser = new User({
+      email,
+      password,
+      avatarURL: gravatar.url(email, { d: "identicon" }),
+    });
     newUser.setPassword(password);
     await newUser.save();
     return newUser;
@@ -88,10 +99,47 @@ const updateUserSubscription = async (userId, subscription) => {
   }
 };
 
+const uploadUserAvatar = async (user, avatarOriginalName) => {
+  Jimp.read(avatarOriginalName)
+    .then((avatar) => {
+      return avatar.resize(250, 250);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+  const extensionIndex = avatarOriginalName.lastIndexOf(".");
+  const extension = avatarOriginalName.slice(extensionIndex);
+  const newName = `${user.email}_${nanoid(5)}${extension}`;
+  const fileName = path.join(storeImage, newName);
+  try {
+    await fs.rename(avatarOriginalName, fileName);
+    const updatedUser = await User.findByIdAndUpdate(
+      user,
+      {
+        avatarURL: `/avatars/${newName}`,
+      },
+      {
+        new: true,
+      }
+    );
+    return { avatarURL: updatedUser.avatarURL };
+  } catch (err) {
+    try {
+      await fs.unlink(avatarOriginalName);
+    } catch (err) {
+      console.error(err.message);
+      throw err;
+    }
+    console.error(err.message);
+    throw err;
+  }
+};
+
 module.exports = {
   addUser,
   login,
   logoutUser,
   findUserInfo,
   updateUserSubscription,
+  uploadUserAvatar,
 };
