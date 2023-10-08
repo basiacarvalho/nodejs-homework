@@ -5,9 +5,28 @@ const Jimp = require("jimp");
 const fs = require("fs").promises;
 const { nanoid } = require("nanoid");
 const path = require("path");
+const nodemailer = require("nodemailer");
+require("dotenv").config();
 
 const secret = process.env.SECRET;
 const storeImage = path.join(process.cwd(), "public/avatars");
+
+const mailerConfig = {
+  host: "smtp.sendgrid.net",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "apikey",
+    pass: process.env.SENDGRID_API_KEY,
+  },
+};
+
+const transporter = nodemailer.createTransport(mailerConfig);
+
+const emailOptions = {
+  from: process.env.VERIFICATION_FROM,
+  subject: "E-mail verification",
+};
 
 const addUser = async (email, password) => {
   try {
@@ -19,9 +38,12 @@ const addUser = async (email, password) => {
       email,
       password,
       avatarURL: gravatar.url(email, { d: "identicon" }),
+      verificationToken: nanoid(),
     });
     newUser.setPassword(password);
     await newUser.save();
+
+    sendRegistrationEmail(newUser);
     return newUser;
   } catch (err) {
     console.error(err.message);
@@ -29,9 +51,22 @@ const addUser = async (email, password) => {
   }
 };
 
+const sendRegistrationEmail = (newUser) => {
+  const userEmailOptions = {
+    ...emailOptions,
+    to: newUser.email,
+    text: `Click on the link to verify your account ${process.env.VERIFICATION_ENDPOINT}${newUser.verificationToken}`,
+  };
+
+  transporter
+    .sendMail(userEmailOptions)
+    .then((info) => console.log(info))
+    .catch((err) => console.log(err));
+};
+
 const login = async (email, password) => {
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, verify: true });
     if (!user || !user.validPassword(password)) {
       return null;
     } else {
@@ -53,6 +88,7 @@ const login = async (email, password) => {
     }
   } catch (err) {
     console.error(err.message);
+    throw err;
   }
 };
 
@@ -135,6 +171,20 @@ const uploadUserAvatar = async (user, avatarOriginalName) => {
   }
 };
 
+const tokenSuccessfulyVerified = async (verificationToken) => {
+  try {
+    console.log(verificationToken);
+    const user = await User.findOneAndUpdate(
+      { verificationToken },
+      { verificationToken: null, verify: true }
+    ).lean();
+    return user !== null;
+  } catch (err) {
+    console.log(err.message);
+    throw err;
+  }
+};
+
 module.exports = {
   addUser,
   login,
@@ -142,4 +192,5 @@ module.exports = {
   findUserInfo,
   updateUserSubscription,
   uploadUserAvatar,
+  tokenSuccessfulyVerified,
 };

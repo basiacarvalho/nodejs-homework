@@ -122,6 +122,20 @@ const updateUserAvatar = async (req, res, next) => {
   }
 };
 
+const verifyToken = async (req, res, next) => {
+  const token = req.params.verificationToken;
+  try {
+    const tokenWasVerified = await usersService.tokenSuccessfulyVerified(token);
+    if (tokenWasVerified) {
+      res.status(200).json({ message: "Verification successful" });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   createUser,
   login,
@@ -129,4 +143,5 @@ module.exports = {
   getUserInfo,
   updateUserSubscription,
   updateUserAvatar,
+  verifyToken,
 };
