@@ -136,6 +136,32 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
+const sendVerificationEmail = async (req, res, next) => {
+  const schema = Joi.object({
+    email: Joi.string().required(),
+  });
+
+  const validationResult = schema.validate(req.body);
+  if (validationResult.error) {
+    res.status(400).json({
+      message: `missing required ${validationResult.error.details[0].path[0]} field`,
+    });
+    return;
+  }
+
+  const { email } = req.body;
+  try {
+    const result = await usersService.resendVerificationEmail(email);
+    if (result) {
+      res.status(200).json({ message: "Verification email sent" });
+    } else {
+      res.status(400).json({ message: "Verification has already been passed" });
+    }
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   createUser,
   login,
@@ -144,4 +170,5 @@ module.exports = {
   updateUserSubscription,
   updateUserAvatar,
   verifyToken,
+  sendVerificationEmail,
 };

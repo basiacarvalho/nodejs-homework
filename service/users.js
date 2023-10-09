@@ -43,7 +43,7 @@ const addUser = async (email, password) => {
     newUser.setPassword(password);
     await newUser.save();
 
-    sendRegistrationEmail(newUser);
+    sendVerificationEmail(newUser);
     return newUser;
   } catch (err) {
     console.error(err.message);
@@ -51,7 +51,7 @@ const addUser = async (email, password) => {
   }
 };
 
-const sendRegistrationEmail = (newUser) => {
+const sendVerificationEmail = (newUser) => {
   const userEmailOptions = {
     ...emailOptions,
     to: newUser.email,
@@ -180,7 +180,20 @@ const tokenSuccessfulyVerified = async (verificationToken) => {
     ).lean();
     return user !== null;
   } catch (err) {
-    console.log(err.message);
+    console.error(err.message);
+    throw err;
+  }
+};
+
+const resendVerificationEmail = async (email) => {
+  try {
+    const user = await User.findOne({ email, verify: false });
+    if (user) {
+      sendVerificationEmail(user);
+    }
+    return user;
+  } catch (err) {
+    console.error(err);
     throw err;
   }
 };
@@ -193,4 +206,5 @@ module.exports = {
   updateUserSubscription,
   uploadUserAvatar,
   tokenSuccessfulyVerified,
+  resendVerificationEmail,
 };
