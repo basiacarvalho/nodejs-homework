@@ -122,6 +122,46 @@ const updateUserAvatar = async (req, res, next) => {
   }
 };
 
+const verifyToken = async (req, res, next) => {
+  const token = req.params.verificationToken;
+  try {
+    const tokenWasVerified = await usersService.tokenSuccessfulyVerified(token);
+    if (tokenWasVerified) {
+      res.status(200).json({ message: "Verification successful" });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (err) {
+    return next(err);
+  }
+};
+
+const sendVerificationEmail = async (req, res, next) => {
+  const schema = Joi.object({
+    email: Joi.string().required(),
+  });
+
+  const validationResult = schema.validate(req.body);
+  if (validationResult.error) {
+    res.status(400).json({
+      message: `missing required ${validationResult.error.details[0].path[0]} field`,
+    });
+    return;
+  }
+
+  const { email } = req.body;
+  try {
+    const result = await usersService.resendVerificationEmail(email);
+    if (result) {
+      res.status(200).json({ message: "Verification email sent" });
+    } else {
+      res.status(400).json({ message: "Verification has already been passed" });
+    }
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   createUser,
   login,
@@ -129,4 +169,6 @@ module.exports = {
   getUserInfo,
   updateUserSubscription,
   updateUserAvatar,
+  verifyToken,
+  sendVerificationEmail,
 };
